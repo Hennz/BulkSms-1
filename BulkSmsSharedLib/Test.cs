@@ -19,7 +19,7 @@ namespace BulkSms
                 OleDbDataReader ole_db_reader = null;
                 //
                 ole_db_conn = new OleDbConnection(String.Format(@"Provider=VFPOLEDB.1; Data Source={0};", Constants.DATA_PATH));
-                ole_db_conn.Open();
+                ole_db_conn.Open();//
 
 
                 for(int i=1000; i<10000; i++)
