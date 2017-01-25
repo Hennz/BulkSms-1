@@ -14,7 +14,7 @@ namespace BulkSms
 
             /*try
             {
-                OleDbConnection ole_db_conn = null;
+                OleDbConnection ole_db_conn = null;////hhkh
                 OleDbCommand ole_db_comm = null;
                 OleDbDataReader ole_db_reader = null;
 
