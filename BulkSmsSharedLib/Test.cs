@@ -10,7 +10,7 @@ namespace BulkSms
     {
         public void op()
         {
-            Utils.SendBulkSmsToClients();///b
+            Utils.SendBulkSmsToClients();////
 
             /*try
             {
