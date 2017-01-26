@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BulkSms;
 using System.Net;
 using System.Net.Sockets;
+using System.Windows.Forms;
 
 namespace BulkSmsClient
 {
@@ -13,6 +14,9 @@ namespace BulkSmsClient
     {
         static void Main(string[] args)
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
             TcpClient client = null;
             NetworkStream ns = null;
             try

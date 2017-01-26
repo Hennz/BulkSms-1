@@ -15,6 +15,9 @@ namespace BulkSmsServer
     {
         static void Main(string[] args)
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
             Thread th = new Thread(new ThreadStart(() => {
                 try
                 {

@@ -50,7 +50,6 @@ namespace BulkSmsServer
                         Utils.SendBulkSmsToClients();
                         Thread.Sleep(10000);
                     }
-                    Utils.Log("aa");
                 } else if(handshakeSignal == Constants.SIGNAL_SYNC_UPDATE)
                 {
                     int res = 0;

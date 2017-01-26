@@ -23,7 +23,6 @@ namespace BulkSmsControlPanel
             try
             {
 
-
                 this.panel1.Location = new Point((this.ClientSize.Width - panel1.Width) / 2, (this.ClientSize.Height - panel1.Height) / 2);
 
                 this.panel2.Width = this.panel1.Width;
@@ -58,7 +57,13 @@ namespace BulkSmsControlPanel
                 return;
             }
             LoginForm form = (LoginForm)this.Owner;
+            form.textBox2.Text = "";
             form.Show();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
