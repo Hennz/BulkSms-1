@@ -333,7 +333,7 @@ namespace BulkSmsControlPanel
                 th.Start();
 
             } catch(Exception exp)
-            {
+            {    
                 Utils.Log(exp);
             }
         }
@@ -503,6 +503,11 @@ namespace BulkSmsControlPanel
             {
                 Utils.Log(exp);
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

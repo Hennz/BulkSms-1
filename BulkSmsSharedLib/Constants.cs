@@ -16,6 +16,11 @@ namespace BulkSms
         public static String BULK_SMS_ROUTE = "4";
         public static String BULK_SMS_COUNTRY = "0";
 
+        public static String MYSQL_SERVER = "cdcsweb.in";
+        public static int MYSQL_SERVER_PORT = 3306;
+        public static String MYSQL_SERVER_WORKING_DB = "cdcsin_bulksmsdb";
+        public static String MYSQL_USER_BSMSUSER = "cdcsin_bsmsuser";
+        public static String MYSQL_USER_PASSWORD_BSMSUSER = "cdcs2017cdcs";
 
         public static String DATA_PATH = new IniFile("bulksms.ini").Read("data_location", "APP").Trim();
         public static String DBF_FILE_NAME = new IniFile("bulksms.ini").Read("tbf_file_name", "APP").Trim();
