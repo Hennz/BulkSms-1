@@ -56,6 +56,7 @@ namespace BulkSmsServer
                     lock (HandleRequest.sync_locking)
                     {
                        res = Utils.SendBulkSmsToClients();
+                        Thread.Sleep(10000);
                     }
                     try
                     {

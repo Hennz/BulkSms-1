@@ -5,10 +5,10 @@ namespace BulkSms
     public class Constants
     {
 
-        public static int SIGNAL_NORMAL_UPDATE = 25;
+        public static int SIGNAL_NORMAL_UPDATE = 24;
         public static int SIGNAL_SYNC_UPDATE = 25;
-        public static int SIGNAL_SUCCESS_UPDATE = 100;
-        public static int SIGNAL_FAILURE_UPDATE = 101;
+        public static int SIGNAL_SUCCESS_UPDATE = 26;
+        public static int SIGNAL_FAILURE_UPDATE = 27;
 
         public static String BULK_SMS_SERVER_URL_TO_SEND_MESSAGE = "https://control.msg91.com/api/postsms.php";
         public static String BULK_SMS_AUTH_KEY = "134455AXvXXU6l58597ff2";

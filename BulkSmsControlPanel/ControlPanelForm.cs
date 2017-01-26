@@ -72,7 +72,6 @@ namespace BulkSmsControlPanel
             Dictionary<String, int> outs = new Dictionary<String, int>();
             outs["Mobile Number"] = 200;
             outs["Date"] = 200;
-            outs["Time"] = 200;
             outs["Status"] = 200;
             outs["Request ID"] = 200;
             return outs;
@@ -327,13 +326,7 @@ namespace BulkSmsControlPanel
 
                     } catch(Exception exp)
                     {
-                        BeginInvoke(new MethodInvoker(() =>
-                        {
-                            button5.Enabled = false;
-                            button3.Enabled = true;
-                            button2.Enabled = true;
-                            button3.Text = "Local Report";
-                        }));
+                        //Nothing
                     }
                 }));
                 workerThreads.Add(th);
@@ -408,7 +401,10 @@ namespace BulkSmsControlPanel
                             ns = client.GetStream();
                             ns.WriteByte((byte)Constants.SIGNAL_SYNC_UPDATE);
                             int status = ns.ReadByte();
-
+                            if(status == -1)
+                            {
+                                throw new Exception();
+                            }
                             try
                             {
                                 ns.WriteByte((byte)status);
@@ -433,7 +429,21 @@ namespace BulkSmsControlPanel
                             catch (Exception) { }
 
 
-
+                            if (status == Constants.SIGNAL_SUCCESS_UPDATE)
+                            {
+                                BeginInvoke(new MethodInvoker(() =>
+                                {
+                                    MessageBox.Show("SMS is sent successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    button5.Enabled = true;
+                                    button3.Enabled = true;
+                                    button2.Enabled = true;
+                                    button5.Text = "Resend";
+                                    button3.PerformClick();
+                                }));
+                            } else
+                            {
+                                throw new Exception();
+                            }
 
                         }
                         catch (ThreadAbortException exp)
@@ -483,14 +493,7 @@ namespace BulkSmsControlPanel
                        
                     } catch(Exception exp)
                     {
-                        BeginInvoke(new MethodInvoker(() =>
-                        {
-                            button5.Enabled = true;
-                            button3.Enabled = true;
-                            button2.Enabled = true;
-                            button5.Text = "Resend";
-                        }));
-                        Utils.Log(exp);
+                       //Nothing
                     }
                 }));
                 workerThreads.Add(th);
