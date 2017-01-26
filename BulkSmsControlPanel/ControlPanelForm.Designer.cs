@@ -37,6 +37,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -48,16 +49,18 @@
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.panel1.Controls.Add(this.panel2);
             this.panel1.Controls.Add(this.panel3);
-            this.panel1.Location = new System.Drawing.Point(7, 1);
+            this.panel1.Location = new System.Drawing.Point(62, 32);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1038, 520);
+            this.panel1.Size = new System.Drawing.Size(983, 489);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             // 
             // panel2
             // 
             this.panel2.Controls.Add(this.dataGridView1);
-            this.panel2.Location = new System.Drawing.Point(92, 23);
+            this.panel2.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            this.panel2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(51)))), ((int)(((byte)(67)))));
+            this.panel2.Location = new System.Drawing.Point(13, 13);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(900, 386);
             this.panel2.TabIndex = 4;
@@ -83,7 +86,7 @@
             this.panel3.Controls.Add(this.button1);
             this.panel3.Controls.Add(this.button3);
             this.panel3.Controls.Add(this.button2);
-            this.panel3.Location = new System.Drawing.Point(290, 437);
+            this.panel3.Location = new System.Drawing.Point(272, 417);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(439, 60);
             this.panel3.TabIndex = 3;
@@ -99,6 +102,7 @@
             this.button5.TabIndex = 3;
             this.button5.Text = "Resend";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button1
             // 
@@ -124,6 +128,7 @@
             this.button3.TabIndex = 4;
             this.button3.Text = "Local Report";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button2
             // 
@@ -137,12 +142,24 @@
             this.button2.Text = "Online Report";
             this.button2.UseVisualStyleBackColor = true;
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(51)))), ((int)(((byte)(67)))));
+            this.label3.Location = new System.Drawing.Point(58, 9);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(97, 19);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Online Report";
+            // 
             // ControlPanelForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(149)))), ((int)(((byte)(178)))), ((int)(((byte)(243)))));
             this.ClientSize = new System.Drawing.Size(1042, 533);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ControlPanelForm";
@@ -156,6 +173,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.panel3.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -169,6 +187,6 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.DataGridView dataGridView1;
-
+        private System.Windows.Forms.Label label3;
     }
 }
