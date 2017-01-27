@@ -12,6 +12,7 @@ using System.Security.Permissions;
 using System.Data.OleDb;
 using System.Net;
 using System.Net.Sockets;
+using MySql.Data.MySqlClient;
 
 namespace BulkSmsControlPanel 
 {
@@ -72,6 +73,7 @@ namespace BulkSmsControlPanel
             Dictionary<String, int> outs = new Dictionary<String, int>();
             outs["Mobile Number"] = 200;
             outs["Date"] = 200;
+            outs["Time"] = 200;
             outs["Status"] = 200;
             outs["Request ID"] = 200;
             return outs;
@@ -507,7 +509,160 @@ namespace BulkSmsControlPanel
 
         private void button2_Click(object sender, EventArgs e)
         {
+            try
+            {
+                label3.Text = "Online Report";
+                InitializeDataGridviewOnlineReport();
+                button5.Enabled = false;
+                button3.Enabled = false;
+                button2.Enabled = false;
+                button2.Text = "Loading....";
 
+                Thread th = new Thread(new ThreadStart(() => {
+                    try
+                    {
+                        MySqlConnection mysql_conn = null;
+                        MySqlCommand mysql_comm = null;
+                        MySqlDataReader mysql_reader = null;
+
+                        try
+                        {
+                            String connectionString = String.Format("server={0}; port={1}; database={2}; uid={3}; pwd={4}", Constants.MYSQL_SERVER, Constants.MYSQL_SERVER_PORT, Constants.MYSQL_SERVER_WORKING_DB, Constants.MYSQL_USER_BSMSUSER, Constants.MYSQL_USER_PASSWORD_BSMSUSER);
+                            mysql_conn = new MySqlConnection(connectionString);
+                            mysql_conn.Open();
+                            mysql_comm = mysql_conn.CreateCommand();
+                            mysql_comm.CommandText = String.Format("select * from `BULK_SMS_DELIVERY_REPORTS` where SENDER_ID = BINARY @SENDER_ID");
+                            mysql_comm.Prepare();
+                            mysql_comm.Parameters.AddWithValue("@SENDER_ID", Constants.SENDER_ID.ToString());
+                            mysql_reader = mysql_comm.ExecuteReader();
+                            if (!mysql_reader.HasRows)
+                            {
+                                try
+                                {
+                                    if (mysql_reader != null)
+                                        mysql_reader.Close();
+                                    if (mysql_conn != null)
+                                        mysql_conn.Close();
+                                }
+                                catch (Exception) { }
+
+                                BeginInvoke(new MethodInvoker(() =>
+                                {
+                                    MessageBox.Show("No online report found", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    button5.Enabled = false;
+                                    button3.Enabled = true;
+                                    button2.Enabled = true;
+                                    button2.Text = "Online Report";
+                                }));
+                                return;
+                            }
+
+                            int rIndex = 0;
+                            while (mysql_reader.Read())
+                            {
+                                try
+                                {
+                                    List<String> row_data = new List<string>();
+                                    row_data.Add(mysql_reader.GetString("MOBILE_NUMBER_WITH_CODE"));
+                                    row_data.Add(mysql_reader.GetDateTime("DATE"));
+                                    row_data.Add(mysql_reader.GetString(mysql_reader.GetOrdinal("SMS")));
+                                    String status = mysql_reader.GetString(mysql_reader.GetOrdinal("STATUS")).Trim();
+                                    if (status.Equals("1"))
+                                    {
+                                        row_data.Add("Sent");
+                                    }
+                                    else
+                                    {
+                                        row_data.Add("Not sent");
+                                    }
+                                    BeginInvoke(new MethodInvoker(() =>
+                                    {
+                                        dataGridView1.Rows.Insert(rIndex, row_data.ToArray());
+                                        setupGridView();
+                                        rIndex++;
+                                    }));
+                                }
+                                catch (Exception) { }
+                            }
+
+                            try
+                            {
+                                if (mysql_reader != null)
+                                    mysql_reader.Close();
+                                if (mysql_conn != null)
+                                    mysql_conn.Close();
+                            }
+                            catch (Exception) { }
+
+                            BeginInvoke(new MethodInvoker(() =>
+                            {
+                                button5.Enabled = true;
+                                button3.Enabled = true;
+                                button2.Enabled = true;
+                                button3.Text = "Local Report";
+                            }));
+
+                        }
+                        catch (ThreadAbortException exp)
+                        {
+                            try
+                            {
+                                if (mysql_reader != null)
+                                    mysql_reader.Close();
+                                if (mysql_conn != null)
+                                    mysql_conn.Close();
+                            }
+                            catch (Exception) { }
+                            throw new Exception();
+                        }
+                        catch (ThreadInterruptedException exp)
+                        {
+                            try
+                            {
+                                if (mysql_reader != null)
+                                    mysql_reader.Close();
+                                if (mysql_conn != null)
+                                    mysql_conn.Close();
+                            }
+                            catch (Exception) { }
+                            throw new Exception();
+                        }
+                        catch (Exception exp)
+                        {
+                            try
+                            {
+                                if (mysql_reader != null)
+                                    mysql_reader.Close();
+                                if (mysql_conn != null)
+                                    mysql_conn.Close();
+                            }
+                            catch (Exception) { }
+                            BeginInvoke(new MethodInvoker(() =>
+                            {
+                                MessageBox.Show("Local Report could not be loaded", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                button5.Enabled = false;
+                                button3.Enabled = true;
+                                button2.Enabled = true;
+                                button3.Text = "Local Report";
+                            }));
+                            Utils.Log(exp);
+                        }
+
+
+                    }
+                    catch (Exception exp)
+                    {
+                        //Nothing
+                    }
+                }));
+                workerThreads.Add(th);
+                th.Start();
+
+            }
+            catch (Exception exp)
+            {
+                Utils.Log(exp);
+            }
         }
     }
 }

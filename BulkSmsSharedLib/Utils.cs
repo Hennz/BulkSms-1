@@ -19,6 +19,11 @@ namespace BulkSms
             MessageBox.Show(logs);
         }
 
+        public static String dateTimeToStr(DateTime dt)
+        {
+            return String.Format("{0}/{1}/{2}", dt.Day, dt.Month, dt.Year);
+        }
+
         public static int SendBulkSmsToClients()
         {
             int outs = 0;
@@ -61,8 +66,8 @@ namespace BulkSms
                 }
                 ole_db_reader.Close();
 
-                //String requestID = Utils.SendBulkSms(intlNumbersWithCode, messages);
-                String requestID = "";
+                String requestID = Utils.SendBulkSms(intlNumbersWithCode, messages);
+                //String requestID = "";
                 if (requestID == null)
                 {
                     throw new Exception("Could not send due to network error");

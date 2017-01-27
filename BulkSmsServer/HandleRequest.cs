@@ -48,7 +48,6 @@ namespace BulkSmsServer
                     lock(HandleRequest.sync_locking)
                     {
                         Utils.SendBulkSmsToClients();
-                        Thread.Sleep(10000);
                     }
                 } else if(handshakeSignal == Constants.SIGNAL_SYNC_UPDATE)
                 {
@@ -56,7 +55,6 @@ namespace BulkSmsServer
                     lock (HandleRequest.sync_locking)
                     {
                        res = Utils.SendBulkSmsToClients();
-                        Thread.Sleep(10000);
                     }
                     try
                     {
