@@ -20,6 +20,7 @@ namespace BulkSmsControlPanel
     {
         private int MIN_ROWS_IN_DATAGRIDVIEW = 30;
         private List<Thread> workerThreads = new List<Thread>();
+        private int REPORT_RESENDING_MODE = 0; //1 for local report and 2 for online report
 
         public ControlPanelForm()
         {
@@ -48,6 +49,8 @@ namespace BulkSmsControlPanel
                 this.panel3.Location = new Point((this.panel1.Width - this.panel3.Width) / 2, this.panel1.Height - this.panel3.Height);
 
                 this.label3.Location = new Point(this.panel1.Location.X, this.panel1.Location.Y - this.label3.Height - 3);
+
+                this.panel4.Location = new Point(this.panel1.Location.X + (this.panel1.Width - this.panel4.Width), this.panel1.Location.Y - this.panel4.Height);
 
                 button3.PerformClick();
 
@@ -192,7 +195,10 @@ namespace BulkSmsControlPanel
         {
             try
             {
+                REPORT_RESENDING_MODE = 1;
                 label3.Text = "Local Report";
+                textBox1.Text = "0";
+                textBox2.Text = "0";
                 InitializeDataGridviewLocalReport();
                 button5.Enabled = false;
                 button3.Enabled = false;
@@ -258,6 +264,22 @@ namespace BulkSmsControlPanel
                                         dataGridView1.Rows.Insert(rIndex, row_data.ToArray());
                                         setupGridView();
                                         rIndex++;
+                                        if (status.Equals("1"))
+                                        {
+                                            try
+                                            {
+                                                textBox1.Text = (Convert.ToUInt64(textBox1.Text.Trim()) + 1).ToString();
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                        else
+                                        {
+                                            try
+                                            {
+                                                textBox2.Text = (Convert.ToUInt64(textBox2.Text.Trim()) + 1).ToString();
+                                            }
+                                            catch (Exception) { }
+                                        }
                                     }));
                                 } catch(Exception) { }
                             }
@@ -361,24 +383,124 @@ namespace BulkSmsControlPanel
         {
             try
             {
-
-                button5.Enabled = false;
-                button2.Enabled = false;
-                button3.Enabled = false;
-                button5.Text = "Resending...";
-
-                Thread th = new Thread(new ThreadStart(() => {
-                    try
+                if(REPORT_RESENDING_MODE == 1)
+                {
+                    DialogResult r = MessageBox.Show(String.Format("Are you sure to resend sms to TOTAL {0} NUMBERS?", textBox2.Text.Trim()), "SMS Resend", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (r == DialogResult.No || r == DialogResult.Cancel)
                     {
-                        TcpClient client = null;
-                        NetworkStream ns = null;
+                        return;
+                    }
+
+                    button5.Enabled = false;
+                    button2.Enabled = false;
+                    button3.Enabled = false;
+                    button5.Text = "Resending...";
+
+                    Thread th = new Thread(new ThreadStart(() => {
                         try
                         {
-
-                            client = new TcpClient();
+                            TcpClient client = null;
+                            NetworkStream ns = null;
                             try
                             {
-                                client.Connect(IPAddress.Parse(Constants.SERVER_IP), Convert.ToInt32(Constants.SERVER_PORT));
+
+                                client = new TcpClient();
+                                try
+                                {
+                                    client.Connect(IPAddress.Parse(Constants.SERVER_IP), Convert.ToInt32(Constants.SERVER_PORT));
+                                }
+                                catch (Exception exp)
+                                {
+                                    try
+                                    {
+                                        if (ns != null)
+                                            ns.Close();
+                                        if (client != null)
+                                            client.Close();
+                                    }
+                                    catch (Exception) { }
+                                    BeginInvoke(new MethodInvoker(() =>
+                                    {
+                                        MessageBox.Show(String.Format("BulkSMS Server is not running at port {0}, please srart", Convert.ToInt32(Constants.SERVER_PORT)), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        button5.Enabled = true;
+                                        button3.Enabled = true;
+                                        button2.Enabled = true;
+                                        button5.Text = "Resend";
+                                    }));
+                                    return;
+                                }
+                                ns = client.GetStream();
+                                ns.WriteByte((byte)Constants.SIGNAL_SYNC_UPDATE);
+                                int status = ns.ReadByte();
+                                if (status == -1)
+                                {
+                                    throw new Exception();
+                                }
+                                try
+                                {
+                                    ns.WriteByte((byte)status);
+                                    ns.Close();
+                                    client.Close();
+                                }
+                                catch (Exception)
+                                {
+                                    try
+                                    {
+                                        client.Close();
+                                    }
+                                    catch (Exception) { }
+                                }
+
+
+                                try
+                                {
+                                    ns.Close();
+                                    client.Close();
+                                }
+                                catch (Exception) { }
+
+
+                                if (status == Constants.SIGNAL_SUCCESS_UPDATE)
+                                {
+                                    BeginInvoke(new MethodInvoker(() =>
+                                    {
+                                        MessageBox.Show("SMS is sent successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        button5.Enabled = true;
+                                        button3.Enabled = true;
+                                        button2.Enabled = true;
+                                        button5.Text = "Resend";
+                                        button3.PerformClick();
+                                    }));
+                                }
+                                else
+                                {
+                                    throw new Exception();
+                                }
+
+                            }
+                            catch (ThreadAbortException exp)
+                            {
+                                try
+                                {
+                                    if (ns != null)
+                                        ns.Close();
+                                    if (client != null)
+                                        client.Close();
+                                }
+                                catch (Exception) { }
+                                throw new Exception();
+                            }
+                            catch (ThreadInterruptedException exp)
+                            {
+                                try
+                                {
+                                    if (ns != null)
+                                        ns.Close();
+                                    if (client != null)
+                                        client.Close();
+                                }
+                                catch (Exception) { }
+                                throw new Exception();
                             }
                             catch (Exception exp)
                             {
@@ -392,114 +514,30 @@ namespace BulkSmsControlPanel
                                 catch (Exception) { }
                                 BeginInvoke(new MethodInvoker(() =>
                                 {
-                                    MessageBox.Show(String.Format("BulkSMS Server is not running at port {0}, please srart", Convert.ToInt32(Constants.SERVER_PORT)), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("SMS could not be resent", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     button5.Enabled = true;
                                     button3.Enabled = true;
                                     button2.Enabled = true;
                                     button5.Text = "Resend";
                                 }));
-                                return;
-                            }
-                            ns = client.GetStream();
-                            ns.WriteByte((byte)Constants.SIGNAL_SYNC_UPDATE);
-                            int status = ns.ReadByte();
-                            if(status == -1)
-                            {
-                                throw new Exception();
-                            }
-                            try
-                            {
-                                ns.WriteByte((byte)status);
-                                ns.Close();
-                                client.Close();
-                            }
-                            catch (Exception)
-                            {
-                                try
-                                {
-                                    client.Close();
-                                }
-                                catch (Exception) { }
+                                Utils.Log(exp);
                             }
 
-
-                            try
-                            {
-                                ns.Close();
-                                client.Close();
-                            }
-                            catch (Exception) { }
-
-
-                            if (status == Constants.SIGNAL_SUCCESS_UPDATE)
-                            {
-                                BeginInvoke(new MethodInvoker(() =>
-                                {
-                                    MessageBox.Show("SMS is sent successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    button5.Enabled = true;
-                                    button3.Enabled = true;
-                                    button2.Enabled = true;
-                                    button5.Text = "Resend";
-                                    button3.PerformClick();
-                                }));
-                            } else
-                            {
-                                throw new Exception();
-                            }
-
-                        }
-                        catch (ThreadAbortException exp)
-                        {
-                            try
-                            {
-                                if (ns != null)
-                                    ns.Close();
-                                if (client != null)
-                                    client.Close();
-                            }
-                            catch (Exception) { }
-                            throw new Exception();
-                        }
-                        catch (ThreadInterruptedException exp)
-                        {
-                            try
-                            {
-                                if (ns != null)
-                                    ns.Close();
-                                if (client != null)
-                                    client.Close();
-                            }
-                            catch (Exception) { }
-                            throw new Exception();
                         }
                         catch (Exception exp)
                         {
-                            try
-                            {
-                                if (ns != null)
-                                    ns.Close();
-                                if (client != null)
-                                    client.Close();
-                            }
-                            catch (Exception) { }
-                            BeginInvoke(new MethodInvoker(() =>
-                            {
-                                MessageBox.Show("SMS could not be resent", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                button5.Enabled = true;
-                                button3.Enabled = true;
-                                button2.Enabled = true;
-                                button5.Text = "Resend";
-                            }));
-                            Utils.Log(exp);
+                            //Nothing
                         }
-                       
-                    } catch(Exception exp)
-                    {
-                       //Nothing
-                    }
-                }));
-                workerThreads.Add(th);
-                th.Start();
+                    }));
+                    workerThreads.Add(th);
+                    th.Start();
+                } else if(REPORT_RESENDING_MODE == 2)
+                {
+                    
+                } else
+                {
+                    //Nothing
+                }
 
              } catch(Exception exp)
             {
@@ -511,7 +549,10 @@ namespace BulkSmsControlPanel
         {
             try
             {
+                REPORT_RESENDING_MODE = 2;
                 label3.Text = "Online Report";
+                textBox1.Text = "0";
+                textBox2.Text = "0";
                 InitializeDataGridviewOnlineReport();
                 button5.Enabled = false;
                 button3.Enabled = false;
@@ -531,7 +572,7 @@ namespace BulkSmsControlPanel
                             mysql_conn = new MySqlConnection(connectionString);
                             mysql_conn.Open();
                             mysql_comm = mysql_conn.CreateCommand();
-                            mysql_comm.CommandText = String.Format("select * from `BULK_SMS_DELIVERY_REPORTS` where SENDER_ID = BINARY @SENDER_ID");
+                            mysql_comm.CommandText = String.Format("select * from `BULK_SMS_DELIVERY_REPORTS` where SENDER_ID = @SENDER_ID");
                             mysql_comm.Prepare();
                             mysql_comm.Parameters.AddWithValue("@SENDER_ID", Constants.SENDER_ID.ToString());
                             mysql_reader = mysql_comm.ExecuteReader();
@@ -564,22 +605,32 @@ namespace BulkSmsControlPanel
                                 {
                                     List<String> row_data = new List<string>();
                                     row_data.Add(mysql_reader.GetString("MOBILE_NUMBER_WITH_CODE"));
-                                    row_data.Add(mysql_reader.GetDateTime("DATE"));
-                                    row_data.Add(mysql_reader.GetString(mysql_reader.GetOrdinal("SMS")));
-                                    String status = mysql_reader.GetString(mysql_reader.GetOrdinal("STATUS")).Trim();
-                                    if (status.Equals("1"))
-                                    {
-                                        row_data.Add("Sent");
-                                    }
-                                    else
-                                    {
-                                        row_data.Add("Not sent");
-                                    }
+                                    row_data.Add(Utils.dateTimeToStr(mysql_reader.GetDateTime("DATE")));
+                                    row_data.Add(mysql_reader.GetString("TIME"));
+                                    row_data.Add(mysql_reader.GetString("STATUS"));
+                                    row_data.Add(mysql_reader.GetString("REQUEST_ID"));
+                                    uint status = mysql_reader.GetUInt32("STATUS_CODE");
                                     BeginInvoke(new MethodInvoker(() =>
                                     {
                                         dataGridView1.Rows.Insert(rIndex, row_data.ToArray());
                                         setupGridView();
                                         rIndex++;
+                                        if (status == 1)
+                                        {
+                                            try
+                                            {
+                                                textBox1.Text = (Convert.ToUInt64(textBox1.Text.Trim()) + 1).ToString();
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                        else
+                                        {
+                                            try
+                                            {
+                                                textBox2.Text = (Convert.ToUInt64(textBox2.Text.Trim()) + 1).ToString();
+                                            }
+                                            catch (Exception) { }
+                                        }
                                     }));
                                 }
                                 catch (Exception) { }
@@ -596,10 +647,10 @@ namespace BulkSmsControlPanel
 
                             BeginInvoke(new MethodInvoker(() =>
                             {
-                                button5.Enabled = true;
+                                button5.Enabled = false;
                                 button3.Enabled = true;
                                 button2.Enabled = true;
-                                button3.Text = "Local Report";
+                                button2.Text = "Online Report";
                             }));
 
                         }
@@ -639,11 +690,11 @@ namespace BulkSmsControlPanel
                             catch (Exception) { }
                             BeginInvoke(new MethodInvoker(() =>
                             {
-                                MessageBox.Show("Local Report could not be loaded", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                MessageBox.Show("Online Report could not be loaded", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 button5.Enabled = false;
                                 button3.Enabled = true;
                                 button2.Enabled = true;
-                                button3.Text = "Local Report";
+                                button2.Text = "Online Report";
                             }));
                             Utils.Log(exp);
                         }

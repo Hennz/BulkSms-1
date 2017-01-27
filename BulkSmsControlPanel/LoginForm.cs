@@ -22,7 +22,8 @@ namespace BulkSmsControlPanel
         {
             try
             {
-
+                textBox1.Text = Constants.LOGIN_USERNAME;
+                textBox2.Text = "";
             }
             catch (Exception exp)
             {

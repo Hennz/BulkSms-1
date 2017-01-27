@@ -18,7 +18,7 @@ namespace BulkSmsControlPanel
             test();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new  ControlPanelForm());
+            Application.Run(new LoginForm());
         }
 
         public static void test()

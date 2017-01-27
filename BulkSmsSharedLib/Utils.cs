@@ -27,12 +27,11 @@ namespace BulkSms
         public static int SendBulkSmsToClients()
         {
             int outs = 0;
+            OleDbConnection ole_db_conn = null;
+            OleDbCommand ole_db_comm = null;
+            OleDbDataReader ole_db_reader = null;
             try
             {
-                OleDbConnection ole_db_conn = null;
-                OleDbCommand ole_db_comm = null;
-                OleDbDataReader ole_db_reader = null;
-
                 ole_db_conn = new OleDbConnection(String.Format(@"Provider=VFPOLEDB.1; Data Source={0};", Constants.DATA_PATH));
                 ole_db_conn.Open();
                 ole_db_comm = ole_db_conn.CreateCommand();
@@ -91,6 +90,14 @@ namespace BulkSms
 
             } catch(Exception exp)
             {
+                try
+                {
+                    if (ole_db_reader != null)
+                        ole_db_reader.Close();
+                    if (ole_db_conn != null)
+                        ole_db_conn.Close();
+                }
+                catch (Exception) { }
                 outs = 0;
                 Utils.Log(exp);
             }
