@@ -11,7 +11,7 @@ namespace BulkSms
         public static int SIGNAL_FAILURE_UPDATE = 27;
 
         public static String BULK_SMS_SERVER_URL_TO_SEND_MESSAGE = "https://control.msg91.com/api/postsms.php";
-        public static String BULK_SMS_AUTH_KEY = "134455AXvXXU6l58597ff2";
+        public static String BULK_SMS_AUTH_KEY = "142079AzXN1imTotPQ58aac72b";
         public static String BULK_SMS_CAMPAIGN = "Bulk SMS";
         public static String BULK_SMS_ROUTE = "4";
         public static String BULK_SMS_COUNTRY = "0";

@@ -150,11 +150,11 @@ namespace BulkSmsControlPanel
                 {
                     if (i % 2 == 0)
                     {
-                        dataGridView1.Rows[i].DefaultCellStyle.BackColor = Color.FromArgb(227, 255, 246);
+                        dataGridView1.Rows[i].DefaultCellStyle.BackColor = Color.FromArgb(250, 250, 250);
                     }
                     else
                     {
-                        dataGridView1.Rows[i].DefaultCellStyle.BackColor = Color.FromArgb(255, 255, 255);
+                        dataGridView1.Rows[i].DefaultCellStyle.BackColor = Color.FromArgb(250, 250, 250);
                     }
                 }
             } catch(Exception exp)
@@ -714,6 +714,11 @@ namespace BulkSmsControlPanel
             {
                 Utils.Log(exp);
             }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }
